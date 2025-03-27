@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MUTTERAPP – Kostenübersicht Trauerfall</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      /* Hintergrundbild */
+      background-image: url('https://i.imgur.com/AkVQK3t.jpg');
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+      color: #111; /* Dunklere Schriftfarbe */
+      max-width: 700px;
+      margin: 30px auto;
+      padding: 25px 35px;
+      border-radius: 15px;
+      box-shadow: 0 6px 20px rgba(150, 150, 180, 0.15);
+      background-color: rgba(255,255,255,0.85); /* Leicht transparenter Hintergrund für bessere Lesbarkeit */
+    }
+    h1 {
+      text-align: center;
+      font-size: 2.2em;
+      color: #8B4513; /* Dunkelbraun */
+      margin-bottom: 25px;
+      border-bottom: 2px solid #A0522D; /* Etwas helleres Braun */
+      padding-bottom: 10px;
+      font-weight: 600; /* Kräftigere Schrift */
+    }
+    h2 {
+      font-size: 1.6em;
+      color: #556B2F; /* Dunkelgrün */
+      margin-top: 35px;
+      margin-bottom: 15px;
+      border-bottom: 1px solid #8FBC8F; /* Helleres Grün */
+      padding-bottom: 5px;
+      font-weight: 500;
+    }
+    .kosten-block {
+      margin-bottom: 20px;
+      padding: 15px;
+      background-color: rgba(245,245,245,0.8); /* Noch transparenter */
+      border-radius: 8px;
+      border: 1px solid #D3D3D3; /* Hellerer Rand */
+    }
+    .kosten-item, .posten {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 12px 0;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #E0E0E0;
+      font-size: 1.05em;
+      color: #222; /* Noch dunkler */
+    }
+    .posten:last-child, .kosten-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+      margin-bottom: 0;
+    }
+    .item-label-container {
+      flex-grow: 1;
+      display: flex;
+      align-items: center;
+      padding-right: 15px;
+      color: #333; /* Noch dunkler */
+    }
+    .item-icon {
+      margin-right: 8px;
+      font-size: 1.1em;
+      display: inline-block;
+      width: 20px;
+      text-align: center;
+    }
+    .posten .item-label-container {
+      cursor: pointer;
+    }
+    .kosten-item span:last-child, .posten .betrag {
+      font-weight: 600;
+      color: #444; /* Dunkleres Grau */
+      white-space: nowrap;
+    }
+    .kosten-item.abzug span:last-child {
+      color: #B22222; /* Dunkleres Rot */
+    }
+    .posten input[type="checkbox"] {
+      transform: scale(1.3);
+      margin-right: 12px;
+      flex-shrink: 0;
+      cursor: pointer;
+      accent-color: #A0522D; /* Brauner Farbton für Checkbox */
+    }
+    .kosten-summary {
+      border-top: 3px solid #A0522D; /* Braun */
+      margin-top: 40px;
+      padding-top: 20px;
+      background-color: rgba(245,245,245,0.8);
+      padding: 20px;
+      border-radius: 8px;
+    }
+    .summary-line {
+      text-align: right;
+      margin-bottom: 8px;
+      font-size: 1.1em;
+      color: #222; /* Dunkler */
+    }
+    .summary-line span {
+      display: inline-block;
+      min-width: 200px;
+      text-align: left;
+      color: #333; /* Dunkler */
+    }
+    .summary-line strong {
+      display: inline-block;
+      min-width: 110px;
+      text-align: right;
+    }
+    #kranzbetrag strong {
+      color: #556B2F; /* Dunkelgrün */
+    }
+    #gesamtbetragInitial strong {
+      color: #696969; /* Noch dunkleres Grau */
+    }
+    #restbetrag {
+      font-size: 1.5em;
+      font-weight: bold;
+      margin-top: 15px;
+      color: #B22222; /* Dunkleres Rot */
+    }
+    #restbetrag span {
+      color: #A52A2A; /* Noch dunkleres Rot */
+    }
+    #restbetrag strong {
+      color: #B22222; /* Dunkleres Rot */
+      min-width: 130px;
+    }
+    .posten.bezahlt .item-label-container,
+    .posten.bezahlt .betrag {
+      text-decoration: line-through;
+      color: #808080; /* Dunkelgrau */
+      opacity: 0.7;
+    }
+    .posten.bezahlt .item-icon {
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+  <h1>MUTTERAPP – Kostenübersicht Trauerfall</h1>
+  <div class="kosten-block">
+    <h2>Gesamtkostenübersicht (Initial)</h2>
+    <div id="statischeKostenListe">
+    </div>
+  </div>
+  <div class="kosten-block">
+    <h2>Aufschlüsselung Kranzkosten</h2>
+    <div id="postenListe">
+    </div>
+  </div>
+  <div class="kosten-summary">
+    <div class="summary-line" id="kranzbetrag"><span>Offene Kranzkosten:</span> <strong>0,00 €</strong></div>
+    <div class="summary-line" id="gesamtbetragInitial"><span>Ursprüngliche Gesamtkosten:</span> <strong>0,00 €</strong></div>
+    <div class="summary-line" id="restbetrag"><span>Offene Gesamtkosten:</span> <strong>0,00 €</strong></div>
+  </div>
+  <script>
+    const initialGesamtKosten = 2422.88;
+    const statischeKosten = [
+      { name: 'Restaurant', betrag: 810.10, icon: '🍽️' },
+      { name: 'Trinkgeld', betrag: 50.00, icon: '💰' },
+      { name: 'Steinmetz', betrag: 969.85, icon: '🪦' },
+      { name: 'Abzug: Trauerkarten', betrag: -560.00, icon: '✉️' }
+    ];
+    const kranzPosten = [
+      { name: 'Kranz rosa Rosen Schleierkraut', betrag: 200.00, bezahlt: false },
+      { name: 'Bukett gelb-orange', betrag: 120.00, bezahlt: false },
+      { name: 'Herz bunt Schleierkraut', betrag: 110.00, bezahlt: false },
+      { name: 'Herz orange-gelb', betrag: 110.00, bezahlt: false },
+      { name: 'Gesteck klein', betrag: 50.00, bezahlt: false },
+      { name: 'Schale', betrag: 34.99, bezahlt: false },
+      { name: 'Kranz rote Rosen', betrag: 250.00, bezahlt: false },
+      { name: 'Kranz bunt', betrag: 200.00, bezahlt: false },
+      { name: '30 rote Rosen', betrag: 77.94, bezahlt: false },
+    ];
+    const kranzIcon = '💐';
+    const statischeKostenListeDiv = document.getElementById('statischeKostenListe');
+    const postenListeDiv = document.getElementById('postenListe');
+    const kranzbetragDiv = document.getElementById('kranzbetrag').querySelector('strong');
+    const restbetragDiv = document.getElementById('restbetrag').querySelector('strong');
+    const gesamtbetragInitialDiv = document.getElementById('gesamtbetragInitial').querySelector('strong');
+    const kranzGesamtBetrag = kranzPosten.reduce((acc, p) => acc + p.betrag, 0);
+    function updateSummen() {
+      let kranzBezahltBetrag = kranzPosten
+        .filter(p => p.bezahlt)
+        .reduce((acc, p) => acc + p.betrag, 0);
+      let kranzOffenBetrag = kranzGesamtBetrag - kranzBezahltBetrag;
+      let gesamtOffenBetrag = initialGesamtKosten - kranzBezahltBetrag;
+      kranzbetragDiv.textContent = `${kranzOffenBetrag.toFixed(2)} € / ${kranzGesamtBetrag.toFixed(2)} €`;
+      restbetragDiv.textContent = `${gesamtOffenBetrag.toFixed(2)} €`;
+      gesamtbetragInitialDiv.textContent = `${initialGesamtKosten.toFixed(2)} €`;
+      document.querySelectorAll('.posten').forEach((div, index) => {
+        const labelContainer = div.querySelector('.item-label-container');
+        const betragSpan = div.querySelector('.betrag');
+        const iconSpan = div.querySelector('.item-icon');
+        if (kranzPosten[index].bezahlt) {
+          div.classList.add('bezahlt');
+        } else {
+          div.classList.remove('bezahlt');
+        }
+      });
+    }
+    statischeKosten.forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'kosten-item';
+      if (item.betrag < 0) {
+        div.classList.add('abzug');
+      }
+      const labelContainer = document.createElement('span');
+      labelContainer.className = 'item-label-container';
+      const iconSpan = document.createElement('span');
+      iconSpan.className = 'item-icon';
+      iconSpan.textContent = item.icon || '';
+      const textSpan = document.createElement('span');
+      textSpan.textContent = item.name;
+      labelContainer.appendChild(iconSpan);
+      labelContainer.appendChild(textSpan);
+      const betragSpan = document.createElement('span');
+      betragSpan.textContent = `${item.betrag.toFixed(2)} €`;
+      div.appendChild(labelContainer);
+      div.appendChild(betragSpan);
+      statischeKostenListeDiv.appendChild(div);
+    });
+    const kranzGesamtDiv = document.createElement('div');
+    kranzGesamtDiv.className = 'kosten-item';
+    kranzGesamtDiv.innerHTML = `<span class="item-label-container"><span class="item-icon">${kranzIcon}</span><span>Kränze (gesamt)</span></span><span>${kranzGesamtBetrag.toFixed(2)} €</span>`;
+    statischeKostenListeDiv.appendChild(kranzGesamtDiv);
+    kranzPosten.forEach((p, index) => {
+      const div = document.createElement('div');
+      div.className = 'posten';
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.checked = p.bezahlt;
+      checkbox.id = `posten-${index}`;
+      checkbox.addEventListener('change', () => {
+        kranzPosten[index].bezahlt = checkbox.checked;
+        updateSummen();
+      });
+      const labelContainer = document.createElement('label');
+      labelContainer.className = 'item-label-container';
+      labelContainer.htmlFor = `posten-${index}`;
+      const iconSpan = document.createElement('span');
+      iconSpan.className = 'item-icon';
+      iconSpan.textContent = kranzIcon;
+      const textSpan = document.createElement('span');
+      textSpan.textContent = p.name;
+      labelContainer.appendChild(iconSpan);
+      labelContainer.appendChild(textSpan);
+      const betragSpan = document.createElement('span');
+      betragSpan.className = 'betrag';
+      betragSpan.textContent = `${p.betrag.toFixed(2)} €`;
+      div.appendChild(checkbox);
+      div.appendChild(labelContainer);
+      div.appendChild(betragSpan);
+      postenListeDiv.appendChild(div);
+    });
+    updateSummen();
+  </script>
+</body>
+</html>
