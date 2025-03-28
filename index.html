@@ -4,28 +4,82 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MUTTERAPP – Kostenübersicht Trauerfall</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
   <style>
+    :root {
+      --primary-color: #A0522D;
+      --primary-dark: #8B4513;
+      --secondary-color: #556B2F;
+      --secondary-light: #8FBC8F;
+      --text-color: #333;
+      --bg-color: rgba(255,255,255,0.85);
+      --card-bg: rgba(245,245,245,0.8);
+      --border-color: #D3D3D3;
+      --danger-color: #B22222;
+      --success-color: #2E8B57;
+      --muted-color: #808080;
+    }
+    
+    .dark {
+      --primary-color: #C87853;
+      --primary-dark: #A0522D;
+      --secondary-color: #8FBC8F;
+      --secondary-light: #556B2F;
+      --text-color: #E0E0E0;
+      --bg-color: rgba(40,40,40,0.9);
+      --card-bg: rgba(60,60,60,0.8);
+      --border-color: #555;
+      --danger-color: #FF6B6B;
+      --success-color: #66CD00;
+      --muted-color: #AAA;
+    }
+    
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-image: url('https://i.imgur.com/AkVQK3t.jpg');
       background-size: cover;
       background-repeat: no-repeat;
+      background-attachment: fixed;
       background-position: center;
-      color: #111;
-      max-width: 650px; /* <<< Geändert: War 700px */
+      color: var(--text-color);
+      transition: all 0.3s ease;
+    }
+    
+    .app-container {
+      max-width: 650px;
       margin: 30px auto;
+      margin-left: 280px; /* Platz für den iframe */
       padding: 25px 35px;
       border-radius: 15px;
-      box-shadow: 0 6px 20px rgba(150, 150, 180, 0.15);
-      background-color: rgba(255,255,255,0.85);
-      position: relative; /* Wichtig für die absolute Positionierung des Buttons */
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+      background-color: var(--bg-color);
+      position: relative;
+      transition: all 0.3s ease;
     }
+    
+    @media (max-width: 768px) {
+      .app-container {
+        margin: 15px auto;
+        padding: 20px;
+        width: 95%;
+      }
+      
+      .mutter-iframe-container {
+        position: relative;
+        width: 100%;
+        height: 250px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+      }
+    }
+    
     .mutter-button {
       position: absolute;
       top: 15px;
-      left: -160px; /* <<< Geändert: War 15px, Button ist jetzt links außerhalb */
-      background-color: #A0522D;
+      right: 15px;
+      background-color: var(--primary-color);
       color: white;
       border: none;
       padding: 10px 20px;
@@ -38,30 +92,44 @@
       gap: 8px;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
       transition: all 0.3s ease;
-      z-index: 10; /* Sicherstellen, dass der Button sichtbar ist, falls er überlappt */
+      z-index: 100;
     }
+    
+    @media (max-width: 768px) {
+      .mutter-button {
+        position: relative;
+        top: 0;
+        right: 0;
+        margin-bottom: 15px;
+        width: 100%;
+        justify-content: center;
+      }
+    }
+    
     .mutter-button:hover {
-      background-color: #8B4513;
+      background-color: var(--primary-dark);
       transform: translateY(-2px);
     }
-    .mutter-button i {
-      font-size: 1.1em;
-    }
+    
     .mutter-iframe-container {
-      position: relative;
-      width: 75%;
-      height: 310px;
-      margin-bottom: 30px;
-      border-radius: 8px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 250px;
+      height: 250px;
+      border-radius: 0 0 8px 0;
       overflow: hidden;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      z-index: 50;
     }
+    
     .mutter-iframe {
       width: 100%;
       height: 100%;
       border: none;
-      background-color: #000; /* Schwarzer Hintergrund als Basis */
+      background-color: #000;
     }
+    
     .iframe-fallback {
       position: absolute;
       top: 50%;
@@ -70,59 +138,70 @@
       color: #fff;
       font-size: 1.2em;
       text-align: center;
-      display: none; /* Standardmäßig versteckt */
-      background-color: rgba(0,0,0,0.7); /* Optional: Hintergrund für bessere Lesbarkeit */
+      display: none;
+      background-color: rgba(0,0,0,0.7);
       padding: 15px;
       border-radius: 5px;
     }
+    
     h1 {
       text-align: center;
       font-size: 2.2em;
-      color: #8B4513;
+      color: var(--primary-color);
       margin-bottom: 25px;
-      border-bottom: 2px solid #A0522D;
+      border-bottom: 2px solid var(--primary-color);
       padding-bottom: 10px;
       font-weight: 600;
-      margin-top: 60px; /* Platz für den Button schaffen, falls er höher ist */
     }
+    
     h2 {
       font-size: 1.6em;
-      color: #556B2F;
+      color: var(--secondary-color);
       margin-top: 35px;
       margin-bottom: 15px;
-      border-bottom: 1px solid #8FBC8F;
+      border-bottom: 1px solid var(--secondary-light);
       padding-bottom: 5px;
       font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
+    
     .kosten-block {
       margin-bottom: 20px;
       padding: 15px;
-      background-color: rgba(245,245,245,0.8);
+      background-color: var(--card-bg);
       border-radius: 8px;
-      border: 1px solid #D3D3D3;
+      border: 1px solid var(--border-color);
+      transition: all 0.3s ease;
     }
+    
     .kosten-item, .posten {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin: 12px 0;
       padding-bottom: 8px;
-      border-bottom: 1px solid #E0E0E0;
+      border-bottom: 1px solid var(--border-color);
       font-size: 1.05em;
-      color: #222;
+      color: var(--text-color);
+      transition: all 0.3s ease;
     }
+    
     .posten:last-child, .kosten-item:last-child {
       border-bottom: none;
       padding-bottom: 0;
       margin-bottom: 0;
     }
+    
     .item-label-container {
       flex-grow: 1;
       display: flex;
       align-items: center;
       padding-right: 15px;
-      color: #333;
+      color: var(--text-color);
     }
+    
     .item-icon {
       margin-right: 8px;
       font-size: 1.1em;
@@ -130,115 +209,376 @@
       width: 20px;
       text-align: center;
     }
+    
     .posten .item-label-container {
       cursor: pointer;
     }
+    
     .kosten-item span:last-child, .posten .betrag {
       font-weight: 600;
-      color: #444;
+      color: var(--text-color);
       white-space: nowrap;
     }
+    
     .kosten-item.abzug span:last-child {
-      color: #B22222;
+      color: var(--danger-color);
     }
+    
     .posten input[type="checkbox"] {
       transform: scale(1.3);
       margin-right: 12px;
       flex-shrink: 0;
       cursor: pointer;
-      accent-color: #A0522D;
+      accent-color: var(--primary-color);
     }
+    
     .kosten-summary {
-      border-top: 3px solid #A0522D;
+      border-top: 3px solid var(--primary-color);
       margin-top: 40px;
       padding-top: 20px;
-      background-color: rgba(245,245,245,0.8);
+      background-color: var(--card-bg);
       padding: 20px;
       border-radius: 8px;
+      transition: all 0.3s ease;
     }
+    
     .summary-line {
       text-align: right;
       margin-bottom: 8px;
       font-size: 1.1em;
-      color: #222;
+      color: var(--text-color);
     }
+    
     .summary-line span {
       display: inline-block;
       min-width: 200px;
       text-align: left;
-      color: #333;
+      color: var(--text-color);
     }
+    
     .summary-line strong {
       display: inline-block;
       min-width: 110px;
       text-align: right;
+      transition: all 0.3s ease;
     }
+    
     #kranzbetrag strong {
-      color: #556B2F;
+      color: var(--secondary-color);
     }
+    
     #gesamtbetragInitial strong {
-      color: #696969;
+      color: var(--muted-color);
     }
+    
     #restbetrag {
       font-size: 1.5em;
       font-weight: bold;
       margin-top: 15px;
-      color: #B22222;
+      color: var(--danger-color);
     }
+    
     #restbetrag span {
-      color: #A52A2A;
+      color: var(--danger-color);
     }
+    
     #restbetrag strong {
-      color: #B22222;
+      color: var(--danger-color);
       min-width: 130px;
     }
+    
     .posten.bezahlt .item-label-container,
     .posten.bezahlt .betrag {
       text-decoration: line-through;
-      color: #808080;
+      color: var(--muted-color);
       opacity: 0.7;
     }
+    
     .posten.bezahlt .item-icon {
       opacity: 0.5;
+    }
+    
+    /* Neue Stil-Definitionen */
+    .progress-container {
+      width: 100%;
+      height: 10px;
+      background-color: var(--border-color);
+      border-radius: 5px;
+      margin: 15px 0;
+      overflow: hidden;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background-color: var(--success-color);
+      border-radius: 5px;
+      transition: width 0.5s ease-in-out;
+    }
+    
+    .chart-container {
+      width: 100%;
+      height: 200px;
+      margin: 20px 0;
+      position: relative;
+    }
+    
+    .action-bar {
+      display: flex;
+      justify-content: space-between;
+      margin: 20px 0;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    .action-button {
+      padding: 8px 15px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s ease;
+    }
+    
+    .action-button:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+    
+    .action-button.secondary {
+      background-color: var(--secondary-color);
+    }
+    
+    .action-button.secondary:hover {
+      background-color: var(--secondary-light);
+    }
+    
+    .add-form {
+      display: none;
+      background-color: var(--card-bg);
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+      border: 1px solid var(--border-color);
+    }
+    
+    .form-group {
+      margin-bottom: 12px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+    
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 5px;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      font-size: 16px;
+    }
+    
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .toggle-theme {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: none;
+      border: none;
+      color: var(--text-color);
+      font-size: 1.5em;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .tooltip {
+      position: relative;
+      display: inline-block;
+    }
+    
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      width: 200px;
+      background-color: var(--card-bg);
+      color: var(--text-color);
+      text-align: center;
+      border-radius: 6px;
+      padding: 10px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      margin-left: -100px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+    }
+    
+    @media print {
+      body {
+        background-image: none;
+        background-color: white;
+      }
+      
+      .app-container {
+        box-shadow: none;
+        margin: 0;
+        padding: 20px;
+        max-width: 100%;
+      }
+      
+      .mutter-button, .toggle-theme, .action-bar, .mutter-iframe-container, .add-form,
+      .chart-container {
+        display: none !important;
+      }
+      
+      .kosten-block, .kosten-summary {
+        background-color: white;
+        border: 1px solid #ddd;
+        page-break-inside: avoid;
+      }
+      
+      h1, h2, .kosten-item, .posten, .summary-line {
+        color: black !important;
+      }
     }
   </style>
 </head>
 <body>
-  <button class="mutter-button" onclick="window.open('https://zaha175.github.io/MUTTER3D/', '_blank')">
-    Für Mama <i class="fas fa-heart"></i>
-  </button>
+  <!-- Iframe im linken oberen Eck -->
   <div class="mutter-iframe-container">
-    <iframe src="https://zaha175.github.io/MUTTER3D/" class="mutter-iframe"></iframe>
+    <iframe src="https://zaha175.github.io/MUTTER3D/" class="mutter-iframe" title="Erinnerung an Mama"></iframe>
     <div class="iframe-fallback">Die 3D-App konnte nicht geladen werden. <a href="https://zaha175.github.io/MUTTER3D/" target="_blank">Hier klicken</a> zum Öffnen.</div>
   </div>
 
-  <h1>MUTTERAPP – Kostenübersicht Trauerfall</h1>
+  <div class="app-container">
+    <button class="toggle-theme" aria-label="Theme wechseln">
+      <i class="fas fa-moon"></i>
+    </button>
+    
+    <button class="mutter-button" onclick="window.open('https://zaha175.github.io/MUTTER3D/', '_blank')">
+      Für Mama <i class="fas fa-heart"></i>
+    </button>
 
-  <div class="kosten-block">
-    <h2>Gesamtkostenübersicht (Initial)</h2>
-    <div id="statischeKostenListe"></div>
-  </div>
+    <h1>MUTTERAPP – Kostenübersicht Trauerfall</h1>
+    
+    <div class="action-bar">
+      <button class="action-button" id="add-button">
+        <i class="fas fa-plus"></i> Neuen Posten hinzufügen
+      </button>
+      <button class="action-button secondary" id="print-button">
+        <i class="fas fa-print"></i> Drucken
+      </button>
+      <button class="action-button secondary" id="toggle-chart">
+        <i class="fas fa-chart-pie"></i> Statistik anzeigen
+      </button>
+    </div>
+    
+    <div class="add-form" id="add-form">
+      <h3 class="text-lg font-semibold mb-3">Neuen Posten hinzufügen</h3>
+      <div class="form-group">
+        <label for="posten-kategorie">Kategorie</label>
+        <select id="posten-kategorie" class="text-base">
+          <option value="kranz">Kranz/Blumen</option>
+          <option value="sonstige">Sonstige Kosten</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="posten-name">Bezeichnung</label>
+        <input type="text" id="posten-name" placeholder="z.B. Kranz weiße Rosen" class="text-base">
+      </div>
+      <div class="form-group">
+        <label for="posten-betrag">Betrag (€)</label>
+        <input type="number" id="posten-betrag" placeholder="0.00" min="0" step="0.01" class="text-base">
+      </div>
+      <div class="form-actions">
+        <button class="action-button secondary" id="cancel-add">Abbrechen</button>
+        <button class="action-button" id="save-posten">Speichern</button>
+      </div>
+    </div>
+    
+    <div class="chart-container" id="chart-container" style="display: none;">
+      <canvas id="kostenChart"></canvas>
+    </div>
+    
+    <div class="progress-container tooltip">
+      <div class="progress-bar" id="progress-bar"></div>
+      <div class="tooltiptext">Zeigt den Anteil der bereits bezahlten Kosten am Gesamtbetrag</div>
+    </div>
 
-  <div class="kosten-block">
-    <h2>Aufschlüsselung Kranzkosten</h2>
-    <div id="postenListe"></div>
-  </div>
+    <div class="kosten-block fade-in">
+      <h2>
+        Gesamtkostenübersicht
+        <span class="tooltip">
+          <i class="fas fa-info-circle text-sm"></i>
+          <span class="tooltiptext">Fixkosten und Gesamtsumme für alle Kranz- und Blumenkosten</span>
+        </span>
+      </h2>
+      <div id="statischeKostenListe"></div>
+    </div>
 
-  <div class="kosten-summary">
-    <div class="summary-line" id="kranzbetrag"><span>Offene Kranzkosten:</span> <strong>0,00 €</strong></div>
-    <div class="summary-line" id="gesamtbetragInitial"><span>Ursprüngliche Gesamtkosten:</span> <strong>0,00 €</strong></div>
-    <div class="summary-line" id="restbetrag"><span>Offene Gesamtkosten:</span> <strong>0,00 €</strong></div>
+    <div class="kosten-block fade-in">
+      <h2>
+        Aufschlüsselung Kranzkosten
+        <span class="tooltip">
+          <i class="fas fa-info-circle text-sm"></i>
+          <span class="tooltiptext">Einzelposten der Kranz- und Blumenkosten. Klicken Sie die Checkboxen an, um Posten als bezahlt zu markieren.</span>
+        </span>
+      </h2>
+      <div id="postenListe"></div>
+    </div>
+
+    <div class="kosten-summary fade-in">
+      <div class="summary-line" id="kranzbetrag"><span>Offene Kranzkosten:</span> <strong>0,00 €</strong></div>
+      <div class="summary-line" id="gesamtbetragInitial"><span>Ursprüngliche Gesamtkosten:</span> <strong>0,00 €</strong></div>
+      <div class="summary-line" id="restbetrag"><span>Offene Gesamtkosten:</span> <strong>0,00 €</strong></div>
+    </div>
   </div>
 
   <script>
-    const initialGesamtKosten = 2422.88;
+    // Daten & Konfiguration
+    let initialGesamtKosten = 2422.88;
     const statischeKosten = [
       { name: 'Restaurant', betrag: 810.10, icon: '🍽️' },
       { name: 'Trinkgeld', betrag: 50.00, icon: '💰' },
       { name: 'Steinmetz', betrag: 969.85, icon: '🪦' },
       { name: 'Abzug: Trauerkarten', betrag: -560.00, icon: '✉️' }
     ];
-    const kranzPosten = [
+    let kranzPosten = [
       { name: 'Kranz rosa Rosen Schleierkraut', betrag: 200.00, bezahlt: false },
       { name: 'Bukett gelb-orange', betrag: 120.00, bezahlt: false },
       { name: 'Herz bunt Schleierkraut', betrag: 110.00, bezahlt: false },
@@ -250,103 +590,376 @@
       { name: '30 rote Rosen', betrag: 77.94, bezahlt: false },
     ];
     const kranzIcon = '💐';
-
+    
+    // DOM-Elemente
     const statischeKostenListeDiv = document.getElementById('statischeKostenListe');
     const postenListeDiv = document.getElementById('postenListe');
     const kranzbetragDiv = document.getElementById('kranzbetrag').querySelector('strong');
     const restbetragDiv = document.getElementById('restbetrag').querySelector('strong');
     const gesamtbetragInitialDiv = document.getElementById('gesamtbetragInitial').querySelector('strong');
-
-    const kranzGesamtBetrag = kranzPosten.reduce((acc, p) => acc + p.betrag, 0);
-
+    const progressBar = document.getElementById('progress-bar');
+    const addForm = document.getElementById('add-form');
+    const chartContainer = document.getElementById('chart-container');
+    const toggleThemeBtn = document.querySelector('.toggle-theme');
+    
+    // Berechne kranzGesamtBetrag
+    let kranzGesamtBetrag = kranzPosten.reduce((acc, p) => acc + p.betrag, 0);
+    
+    // Dark/Light Mode Funktion
+    function initThemeToggle() {
+      // Prüfe die Systemeinstellung für das Farbschema
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.add('dark');
+        toggleThemeBtn.innerHTML = '<i class="fas fa-sun"></i>';
+      }
+      
+      // Event Listener für Systemänderungen
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+        if (event.matches) {
+          document.documentElement.classList.add('dark');
+          toggleThemeBtn.innerHTML = '<i class="fas fa-sun"></i>';
+        } else {
+          document.documentElement.classList.remove('dark');
+          toggleThemeBtn.innerHTML = '<i class="fas fa-moon"></i>';
+        }
+      });
+      
+      // Manueller Toggle mit dem Button
+      toggleThemeBtn.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        if (document.documentElement.classList.contains('dark')) {
+          toggleThemeBtn.innerHTML = '<i class="fas fa-sun"></i>';
+        } else {
+          toggleThemeBtn.innerHTML = '<i class="fas fa-moon"></i>';
+        }
+      });
+    }
+    
+    // Local Storage Funktionen
+    function saveToDB() {
+      try {
+        localStorage.setItem('kranzPosten', JSON.stringify(kranzPosten));
+        localStorage.setItem('initialGesamtKosten', initialGesamtKosten.toString());
+      } catch (e) {
+        console.log('Speichern im Local Storage nicht möglich');
+      }
+    }
+    
+    function loadFromDB() {
+      try {
+        const savedPosten = localStorage.getItem('kranzPosten');
+        const savedInitialKosten = localStorage.getItem('initialGesamtKosten');
+        
+        if (savedPosten) {
+          kranzPosten = JSON.parse(savedPosten);
+          // Neuberechnen der Gesamtsumme
+          kranzGesamtBetrag = kranzPosten.reduce((acc, p) => acc + p.betrag, 0);
+        }
+        
+        if (savedInitialKosten) {
+          initialGesamtKosten = parseFloat(savedInitialKosten);
+        }
+      } catch (e) {
+        console.log('Laden aus Local Storage nicht möglich');
+      }
+    }
+    
+    // UI-Aktualisierung
     function updateSummen() {
       let kranzBezahltBetrag = kranzPosten
         .filter(p => p.bezahlt)
         .reduce((acc, p) => acc + p.betrag, 0);
       let kranzOffenBetrag = kranzGesamtBetrag - kranzBezahltBetrag;
       let gesamtOffenBetrag = initialGesamtKosten - kranzBezahltBetrag;
-
+      
+      // Prozentsatz der bezahlten Kosten berechnen (für Fortschrittsbalken)
+      const bezahltProzent = (kranzBezahltBetrag / kranzGesamtBetrag) * 100;
+      
+      // UI aktualisieren
       kranzbetragDiv.textContent = `${kranzOffenBetrag.toFixed(2)} € / ${kranzGesamtBetrag.toFixed(2)} €`;
       restbetragDiv.textContent = `${gesamtOffenBetrag.toFixed(2)} €`;
       gesamtbetragInitialDiv.textContent = `${initialGesamtKosten.toFixed(2)} €`;
-
+      progressBar.style.width = `${bezahltProzent}%`;
+      
+      // Posten-Status aktualisieren
       document.querySelectorAll('.posten').forEach((div, index) => {
-        const labelContainer = div.querySelector('.item-label-container');
-        const betragSpan = div.querySelector('.betrag');
-        const iconSpan = div.querySelector('.item-icon');
-        if (kranzPosten[index].bezahlt) {
+        if (kranzPosten[index] && kranzPosten[index].bezahlt) {
           div.classList.add('bezahlt');
         } else {
           div.classList.remove('bezahlt');
         }
       });
+      
+      // In Local Storage speichern
+      saveToDB();
+      
+      // Chart aktualisieren, falls vorhanden
+      updateChart();
     }
-
-    statischeKosten.forEach(item => {
-      const div = document.createElement('div');
-      div.className = 'kosten-item';
-      if (item.betrag < 0) {
-        div.classList.add('abzug');
-      }
-      const labelContainer = document.createElement('span');
-      labelContainer.className = 'item-label-container';
-      const iconSpan = document.createElement('span');
-      iconSpan.className = 'item-icon';
-      iconSpan.textContent = item.icon || '';
-      const textSpan = document.createElement('span');
-      textSpan.textContent = item.name;
-      labelContainer.appendChild(iconSpan);
-      labelContainer.appendChild(textSpan);
-      const betragSpan = document.createElement('span');
-      betragSpan.textContent = `${item.betrag.toFixed(2)} €`;
-      div.appendChild(labelContainer);
-      div.appendChild(betragSpan);
-      statischeKostenListeDiv.appendChild(div);
-    });
-
-    const kranzGesamtDiv = document.createElement('div');
-    kranzGesamtDiv.className = 'kosten-item';
-    kranzGesamtDiv.innerHTML = `<span class="item-label-container"><span class="item-icon">${kranzIcon}</span><span>Kränze (gesamt)</span></span><span>${kranzGesamtBetrag.toFixed(2)} €</span>`;
-    statischeKostenListeDiv.appendChild(kranzGesamtDiv);
-
-    kranzPosten.forEach((p, index) => {
-      const div = document.createElement('div');
-      div.className = 'posten';
-      const checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
-      checkbox.checked = p.bezahlt;
-      checkbox.id = `posten-${index}`;
-      checkbox.addEventListener('change', () => {
-        kranzPosten[index].bezahlt = checkbox.checked;
-        updateSummen();
+    
+    // Statische Kosten rendern
+    function renderStatischeKosten() {
+      statischeKostenListeDiv.innerHTML = '';
+      
+      statischeKosten.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'kosten-item';
+        if (item.betrag < 0) {
+          div.classList.add('abzug');
+        }
+        
+        const labelContainer = document.createElement('span');
+        labelContainer.className = 'item-label-container';
+        
+        const iconSpan = document.createElement('span');
+        iconSpan.className = 'item-icon';
+        iconSpan.textContent = item.icon || '';
+        
+        const textSpan = document.createElement('span');
+        textSpan.textContent = item.name;
+        
+        labelContainer.appendChild(iconSpan);
+        labelContainer.appendChild(textSpan);
+        
+        const betragSpan = document.createElement('span');
+        betragSpan.textContent = `${item.betrag.toFixed(2)} €`;
+        
+        div.appendChild(labelContainer);
+        div.appendChild(betragSpan);
+        statischeKostenListeDiv.appendChild(div);
       });
-
-      const labelContainer = document.createElement('label');
-      labelContainer.className = 'item-label-container';
-      labelContainer.htmlFor = `posten-${index}`; // Verknüpft Label mit Checkbox
-      const iconSpan = document.createElement('span');
-      iconSpan.className = 'item-icon';
-      iconSpan.textContent = kranzIcon;
-      const textSpan = document.createElement('span');
-      textSpan.textContent = p.name;
-      labelContainer.appendChild(iconSpan);
-      labelContainer.appendChild(textSpan);
-
-      const betragSpan = document.createElement('span');
-      betragSpan.className = 'betrag';
-      betragSpan.textContent = `${p.betrag.toFixed(2)} €`;
-
-      div.appendChild(checkbox);
-      div.appendChild(labelContainer);
-      div.appendChild(betragSpan);
-      postenListeDiv.appendChild(div);
-    });
-
-    updateSummen();
-
-    // <<< Geändert: checkIframe Funktion entfernt, da sie wegen CORS-Policy nicht zuverlässig funktioniert >>>
-    // und die Fallback-Nachricht fälschlicherweise anzeigt.
-
+      
+      const kranzGesamtDiv = document.createElement('div');
+      kranzGesamtDiv.className = 'kosten-item';
+      kranzGesamtDiv.innerHTML = `<span class="item-label-container">
+                                     <span class="item-icon">${kranzIcon}</span>
+                                     <span>Kränze (gesamt)</span>
+                                   </span>
+                                   <span>${kranzGesamtBetrag.toFixed(2)} €</span>`;
+      statischeKostenListeDiv.appendChild(kranzGesamtDiv);
+    }
+    
+    // Kranzposten rendern
+    function renderKranzPosten() {
+      postenListeDiv.innerHTML = '';
+      
+      kranzPosten.forEach((p, index) => {
+        const div = document.createElement('div');
+        div.className = 'posten';
+        
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = p.bezahlt;
+        checkbox.id = `posten-${index}`;
+        checkbox.addEventListener('change', () => {
+          kranzPosten[index].bezahlt = checkbox.checked;
+          updateSummen();
+        });
+        
+        const labelContainer = document.createElement('label');
+        labelContainer.className = 'item-label-container';
+        labelContainer.htmlFor = `posten-${index}`;
+        
+        const iconSpan = document.createElement('span');
+        iconSpan.className = 'item-icon';
+        iconSpan.textContent = kranzIcon;
+        
+        const textSpan = document.createElement('span');
+        textSpan.textContent = p.name;
+        
+        labelContainer.appendChild(iconSpan);
+        labelContainer.appendChild(textSpan);
+        
+        const betragSpan = document.createElement('span');
+        betragSpan.className = 'betrag';
+        betragSpan.textContent = `${p.betrag.toFixed(2)} €`;
+        
+        div.appendChild(checkbox);
+        div.appendChild(labelContainer);
+        div.appendChild(betragSpan);
+        postenListeDiv.appendChild(div);
+        
+        // Animation für neue Elemente
+        div.classList.add('fade-in');
+      });
+    }
+    
+    // Chart erstellen und aktualisieren
+    let kostenChart = null;
+    
+    function updateChart() {
+      if (!kostenChart || chartContainer.style.display === 'none') return;
+      
+      const bezahlt = kranzPosten
+        .filter(p => p.bezahlt)
+        .reduce((acc, p) => acc + p.betrag, 0);
+      const offen = kranzGesamtBetrag - bezahlt;
+      
+      kostenChart.data.datasets[0].data = [bezahlt, offen];
+      kostenChart.update();
+    }
+    
+    function initChart() {
+      const ctx = document.getElementById('kostenChart').getContext('2d');
+      
+      const bezahlt = kranzPosten
+        .filter(p => p.bezahlt)
+        .reduce((acc, p) => acc + p.betrag, 0);
+      const offen = kranzGesamtBetrag - bezahlt;
+      
+      kostenChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Bezahlt', 'Offen'],
+          datasets: [{
+            data: [bezahlt, offen],
+            backgroundColor: [
+              getComputedStyle(document.documentElement).getPropertyValue('--success-color'),
+              getComputedStyle(document.documentElement).getPropertyValue('--danger-color')
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                color: getComputedStyle(document.documentElement).getPropertyValue('--text-color')
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  let label = context.label || '';
+                  if (label) {
+                    label += ': ';
+                  }
+                  label += new Intl.NumberFormat('de-DE', {
+                    style: 'currency',
+                    currency: 'EUR'
+                  }).format(context.raw);
+                  return label;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+    
+    // Neuen Posten hinzufügen
+    function addNewPosten() {
+      const kategorie = document.getElementById('posten-kategorie').value;
+      const name = document.getElementById('posten-name').value.trim();
+      const betragStr = document.getElementById('posten-betrag').value.trim();
+      
+      if (!name || !betragStr) {
+        alert('Bitte füllen Sie alle Felder aus.');
+        return;
+      }
+      
+      const betrag = parseFloat(betragStr);
+      
+      if (isNaN(betrag) || betrag <= 0) {
+        alert('Bitte geben Sie einen gültigen Betrag ein.');
+        return;
+      }
+      
+      if (kategorie === 'kranz') {
+        kranzPosten.push({
+          name: name,
+          betrag: betrag,
+          bezahlt: false
+        });
+        
+        // Kranzgesamtbetrag neu berechnen
+        kranzGesamtBetrag = kranzPosten.reduce((acc, p) => acc + p.betrag, 0);
+        
+        // UI neu rendern
+        renderKranzPosten();
+      } else {
+        // Sonstige Kosten direkt zu statischeKosten hinzufügen
+        statischeKosten.push({
+          name: name,
+          betrag: betrag,
+          icon: '📝'
+        });
+        
+        // Initialkosten aktualisieren
+        initialGesamtKosten += betrag;
+        
+        // UI neu rendern
+        renderStatischeKosten();
+      }
+      
+      // Form zurücksetzen und verstecken
+      document.getElementById('posten-name').value = '';
+      document.getElementById('posten-betrag').value = '';
+      addForm.style.display = 'none';
+      
+      // Summen aktualisieren
+      updateSummen();
+    }
+    
+    // Event Listener für Buttons
+    function initEventListeners() {
+      // Hinzufügen-Button
+      document.getElementById('add-button').addEventListener('click', () => {
+        addForm.style.display = addForm.style.display === 'none' ? 'block' : 'none';
+      });
+      
+      // Abbrechen-Button
+      document.getElementById('cancel-add').addEventListener('click', () => {
+        addForm.style.display = 'none';
+        document.getElementById('posten-name').value = '';
+        document.getElementById('posten-betrag').value = '';
+      });
+      
+      // Speichern-Button
+      document.getElementById('save-posten').addEventListener('click', addNewPosten);
+      
+      // Druck-Button
+      document.getElementById('print-button').addEventListener('click', () => {
+        window.print();
+      });
+      
+      // Chart-Toggle
+      document.getElementById('toggle-chart').addEventListener('click', () => {
+        if (chartContainer.style.display === 'none') {
+          chartContainer.style.display = 'block';
+          if (!kostenChart) {
+            initChart();
+          } else {
+            updateChart();
+          }
+        } else {
+          chartContainer.style.display = 'none';
+        }
+      });
+    }
+    
+    // App initialisieren
+    function initApp() {
+      // Daten aus dem LocalStorage laden
+      loadFromDB();
+      
+      // UI rendern
+      renderStatischeKosten();
+      renderKranzPosten();
+      updateSummen();
+      
+      // Event Listener initialisieren
+      initEventListeners();
+      
+      // Theme Toggle initialisieren
+      initThemeToggle();
+    }
+    
+    // App starten
+    initApp();
   </script>
 </body>
 </html>
